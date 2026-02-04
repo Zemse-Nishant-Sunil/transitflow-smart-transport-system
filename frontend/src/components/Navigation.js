@@ -11,7 +11,9 @@ function Navigation({ connected }) {
         { path: '/journey-planner', label: 'Journey Planner', icon: Map },
         { path: '/live-tracking', label: 'Live Tracking', icon: Activity },
         { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-        { path: '/disruptions', label: 'Disruptions', icon: AlertTriangle }
+        { path: '/disruptions', label: 'Disruptions', icon: AlertTriangle },
+        { path: '/badges', label: 'Badges', icon: Map },
+        { path: '/settings', label: 'Settings', icon: Map }
     ];
 
     return (

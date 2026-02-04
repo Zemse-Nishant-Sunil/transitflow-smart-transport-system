@@ -235,6 +235,12 @@ GET /api/analytics/popular-routes
 
 GET /api/disruptions/active
 → Current service issues
+
+# External helper endpoints (example)
+GET /api/external/reverse?lat=<>&lon=<> → Reverse geocode (Nominatim)
+GET /api/external/weather?lat=<>&lon=<> → Current weather (OpenWeatherMap)
+GET /api/external/convert?amount=&from=&to= → Currency conversion (exchangerate.host)
+GET /api/external/ip?ip=<> → IP -> location (ipapi.co)
 ```
 
 ### WebSocket Events
@@ -387,6 +393,9 @@ Suggests alternatives
 PORT=5000
 FRONTEND_URL=http://localhost:3000
 NODE_ENV=development
+# Optional GTFS-RT example
+# GTFS_RT_CITY=mumbai
+# GTFS_RT_FEED_URL=https://api.example.com/gtfs-rt
 ```
 
 ### Frontend (.env)
@@ -395,6 +404,43 @@ REACT_APP_API_URL=http://localhost:5000
 ```
 
 **Templates:** `.env.example` files included
+
+---
+
+## 🌍 Global Expansion & Accuracy Enhancements
+
+This project is scaffolded to support global transit interoperability and smarter, more accurate travel experiences. Key planned and scaffolded features:
+
+- **Open Transit Standards (GTFS + GTFS-RT)** 🔧
+  - Adopt GTFS for static schedules and GTFS-RT for live updates to support city-to-city feeds without rewriting logic.
+  - `backend/services/gtfsService.js` and `backend/services/gtfsRealtimeService.js` provide ingestion & RT polling scaffolds.
+
+- **Multi-City Support** 🌆
+  - Upload per-city GTFS packages, register GTFS-RT URLs, and select cities at runtime via frontend components.
+  - `POST /api/feeds/upload/:cityId` and `POST /api/feeds/register-rt/:cityId` added.
+
+- **Localization (Language & Currency)** 🌐
+  - Auto-detect language/currency via location (country code heuristics) and expose translations.
+  - `backend/services/localizationService.js` with example locales in `backend/locales/`.
+
+- **AI / Accuracy Improvements** 🤖
+  - Crowd prediction scaffolding (`backend/services/crowdPredictor.js`) uses historical analytics heuristics now; ML model training hooks are included.
+  - Real-time disruption alerts are emitted via WebSockets and GTFS-RT vehicle/trip updates are proxied.
+
+- **Carbon Tracking & Analytics** 🌱
+  - `backend/services/carbonService.js` computes route-level CO₂ estimates.
+  - `POST /api/carbon/estimate` to estimate CO₂ per route.
+
+- **UX Enhancements (planned)** ⚡
+  - Live map overlays, journey timelines, offline caching, personalization, and API-friendly endpoints are scaffolded on both frontend and backend for incremental implementation.
+
+---
+
+For full implementation details and next steps see `docs/FEATURE_ROADMAP.md`.
+
+## 🔗 Recommended Free APIs
+
+See `docs/EXTERNAL_APIS.md` for a curated list of free (or freemium) APIs useful for geocoding, traffic, weather, exchange rates, carbon intensity, and agency feeds. These services are referenced by new backend helpers in `backend/services/` and can be enabled via environment variables (see the `EXTERNAL_APIS.md` file for example `.env` entries).
 
 ---
 

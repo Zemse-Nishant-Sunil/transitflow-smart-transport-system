@@ -1,0 +1,12 @@
+{
+  "appTitle": "TransitFlow",
+  "planJourney": "Plan Your Journey",
+  "findRoutes": "Find Routes",
+  "origin": "Origin",
+  "destination": "Destination",
+  "fastest": "Fastest",
+  "cheapest": "Cheapest",
+  "crowd_high": "High crowd expected",
+  "crowd_medium": "Moderate crowd expected",
+  "crowd_low": "Low crowd expected"
+}

@@ -16,3 +16,17 @@ code {
 #root {
     min-height: 100vh;
 }
+
+/* Map vehicle marker */
+.vehicle-dot {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, #ff6b35, #ff8a50);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.leaflet-container {
+    z-index: 0;
+}

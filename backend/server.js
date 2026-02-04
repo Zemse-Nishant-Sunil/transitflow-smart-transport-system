@@ -9,7 +9,15 @@ const realtimeRoutes = require('./routes/realtime');
 const analyticsRoutes = require('./routes/analytics');
 const disruptionRoutes = require('./routes/disruptions');
 
+const feedsRoutes = require('./routes/feeds');
+const predictionRoutes = require('./routes/prediction');
+const localizationRoutes = require('./routes/localization');
+const carbonRoutes = require('./routes/carbon');
+
 const realtimeService = require('./services/realtimeService');
+const gtfsRealtimeService = require('./services/gtfsRealtimeService');
+const localizationService = require('./services/localizationService');
+const crowdPredictor = require('./services/crowdPredictor');
 
 const app = express();
 const server = http.createServer(app);
@@ -35,6 +43,11 @@ app.use('/api/journey', journeyRoutes);
 app.use('/api/realtime', realtimeRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/disruptions', disruptionRoutes);
+app.use('/api/feeds', feedsRoutes);
+app.use('/api/prediction', predictionRoutes);
+app.use('/api/localization', localizationRoutes);
+app.use('/api/carbon', carbonRoutes);
+app.use('/api/external', require('./routes/external'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -62,6 +75,15 @@ io.on('connection', (socket) => {
 
 // Initialize real-time updates
 realtimeService.initialize(io);
+
+// Initialize prediction model (mock)
+crowdPredictor.train();
+
+// Optionally register a GTFS-RT feed from env
+if (process.env.GTFS_RT_FEED_URL && process.env.GTFS_RT_CITY) {
+    console.log('Registering GTFS-RT feed from env');
+    gtfsRealtimeService.registerFeed(process.env.GTFS_RT_CITY, process.env.GTFS_RT_FEED_URL, io);
+}
 
 // Error handling
 app.use((err, req, res, next) => {

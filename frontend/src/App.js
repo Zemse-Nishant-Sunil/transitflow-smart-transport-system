@@ -6,6 +6,8 @@ import JourneyPlanner from './pages/JourneyPlanner';
 import LiveTracking from './pages/LiveTracking';
 import Analytics from './pages/Analytics';
 import Disruptions from './pages/Disruptions';
+import Settings from './pages/Settings';
+import Badges from './pages/Badges';
 import './App.css';
 
 const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -43,6 +45,8 @@ function App() {
                         <Route path="/live-tracking" element={<LiveTracking socket={socket} />} />
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/disruptions" element={<Disruptions socket={socket} />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/badges" element={<Badges />} />
                     </Routes>
                 </main>
             </div>

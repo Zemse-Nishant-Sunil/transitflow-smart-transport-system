@@ -222,6 +222,18 @@
     }
 }
 
+/* Map pane fixed height so Leaflet can render properly */
+.map-pane {
+    height: 420px;
+    overflow: hidden;
+    border-radius: 10px;
+    padding: 0;
+}
+
+@media (max-width: 1024px) {
+    .map-pane { height: 300px; }
+}
+
 @media (max-width: 768px) {
     .page-title {
         font-size: 2rem;

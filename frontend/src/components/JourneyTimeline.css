@@ -1,0 +1,6 @@
+.journey-timeline { padding: 12px; }
+.timeline-list { list-style: none; padding: 0; margin: 0; }
+.timeline-item { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.timeline-item .seg-mode { font-weight: 600; }
+.timeline-item .seg-times { color: #666; font-size: 12px; }
+.timeline-item .seg-instr { color: #333; margin-top: 4px; }

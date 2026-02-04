@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { MapPin, Calendar, Settings, Search, Clock, IndianRupee, TrendingUp, AlertCircle, ArrowRight, Train, Bus, Navigation2, User } from 'lucide-react';
 import RouteCard from '../components/RouteCard';
+import JourneyTimeline from '../components/JourneyTimeline';
+import MapOverlay from '../components/MapOverlay';
+import CrowdIndicator from '../components/CrowdIndicator';
+import CitySelector from '../components/CitySelector';
 import './JourneyPlanner.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -88,6 +92,8 @@ function JourneyPlanner({ socket }) {
                             <MapPin className="header-icon" />
                             <h2 className="card-title">Journey Details</h2>
                         </div>
+
+                        <CitySelector onSelect={(city) => console.log('City selected', city)} />
 
                         <div className="location-section">
                             <div className="input-group">
@@ -258,6 +264,10 @@ function JourneyPlanner({ socket }) {
                 </div>
 
                 <div className="planner-results">
+                    <div className="map-pane card">
+                        <MapOverlay socket={socket} center={[19.0760, 72.8777]} zoom={12} />
+                    </div>
+
                     {routes.length === 0 && !loading && (
                         <div className="empty-state card">
                             <Navigation2 size={64} className="empty-icon" />
@@ -296,6 +306,16 @@ function JourneyPlanner({ socket }) {
                                     />
                                 ))}
                             </div>
+
+                            {selectedRoute && (
+                                <div className="selected-route-panel card">
+                                    <JourneyTimeline route={selectedRoute} />
+                                    <div style={{ marginTop: 8 }}>
+                                        <h4>Predicted Crowd</h4>
+                                        <CrowdIndicator station={selectedRoute.segments[0]?.from} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
