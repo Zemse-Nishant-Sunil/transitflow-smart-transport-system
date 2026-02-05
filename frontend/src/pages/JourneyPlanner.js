@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MapPin, Calendar, Settings, Search, Clock, IndianRupee, TrendingUp, AlertCircle, ArrowRight, Train, Bus, Navigation2, User } from 'lucide-react';
+import { MapPin, Calendar, Settings, Search, Clock, IndianRupee, TrendingUp, AlertCircle, ArrowRight, Train, Bus, Navigation2, User, Locate } from 'lucide-react';
 import RouteCard from '../components/RouteCard';
 import JourneyTimeline from '../components/JourneyTimeline';
 import MapOverlay from '../components/MapOverlay';
@@ -10,9 +10,69 @@ import './JourneyPlanner.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Station database
+const STATIONS_DB = {
+    'churchgate': { id: 'churchgate', name: 'Churchgate', lat: 18.9322, lng: 72.8264, modes: ['local_train', 'metro'] },
+    'marine_lines': { id: 'marine_lines', name: 'Marine Lines', lat: 18.9434, lng: 72.8234, modes: ['local_train'] },
+    'charni_road': { id: 'charni_road', name: 'Charni Road', lat: 18.9533, lng: 72.8196, modes: ['local_train'] },
+    'grant_road': { id: 'grant_road', name: 'Grant Road', lat: 18.9639, lng: 72.8155, modes: ['local_train'] },
+    'mumbai_central': { id: 'mumbai_central', name: 'Mumbai Central', lat: 18.9685, lng: 72.8194, modes: ['local_train', 'metro'] },
+    'mahalaxmi': { id: 'mahalaxmi', name: 'Mahalaxmi', lat: 18.9827, lng: 72.8233, modes: ['local_train'] },
+    'lower_parel': { id: 'lower_parel', name: 'Lower Parel', lat: 18.9969, lng: 72.8304, modes: ['local_train', 'metro'] },
+    'dadar': { id: 'dadar', name: 'Dadar', lat: 19.0176, lng: 72.8432, modes: ['local_train', 'metro', 'bus_terminal'] },
+    'bandra': { id: 'bandra', name: 'Bandra', lat: 19.0544, lng: 72.8407, modes: ['local_train', 'metro', 'bus_terminal'] },
+    'andheri': { id: 'andheri', name: 'Andheri', lat: 19.1197, lng: 72.8464, modes: ['local_train', 'metro', 'bus_terminal'] },
+    'goregaon': { id: 'goregaon', name: 'Goregaon', lat: 19.1645, lng: 72.8489, modes: ['local_train', 'metro'] },
+    'malad': { id: 'malad', name: 'Malad', lat: 19.1868, lng: 72.8481, modes: ['local_train'] },
+    'kandivali': { id: 'kandivali', name: 'Kandivali', lat: 19.2037, lng: 72.8496, modes: ['local_train'] },
+    'borivali': { id: 'borivali', name: 'Borivali', lat: 19.2304, lng: 72.8577, modes: ['local_train', 'metro', 'bus_terminal'] },
+    'mira_road': { id: 'mira_road', name: 'Mira Road', lat: 19.2807, lng: 72.8717, modes: ['local_train'] },
+    'bhayandar': { id: 'bhayandar', name: 'Bhayandar', lat: 19.3012, lng: 72.8503, modes: ['local_train', 'bus_terminal'] },
+    'csmt': { id: 'csmt', name: 'CSMT', lat: 18.9398, lng: 72.8355, modes: ['local_train', 'metro'] },
+    'byculla': { id: 'byculla', name: 'Byculla', lat: 18.9791, lng: 72.8318, modes: ['local_train'] },
+    'kurla': { id: 'kurla', name: 'Kurla', lat: 19.0658, lng: 72.8782, modes: ['local_train', 'metro', 'bus_terminal'] },
+    'ghatkopar': { id: 'ghatkopar', name: 'Ghatkopar', lat: 19.0864, lng: 72.9081, modes: ['local_train', 'metro'] },
+    'vikhroli': { id: 'vikhroli', name: 'Vikhroli', lat: 19.1076, lng: 72.9294, modes: ['local_train'] },
+    'kanjurmarg': { id: 'kanjurmarg', name: 'Kanjurmarg', lat: 19.1302, lng: 72.9323, modes: ['local_train', 'metro'] },
+    'bhandup': { id: 'bhandup', name: 'Bhandup', lat: 19.1440, lng: 72.9371, modes: ['local_train'] },
+    'mulund': { id: 'mulund', name: 'Mulund', lat: 19.1723, lng: 72.9558, modes: ['local_train', 'bus_terminal'] },
+    'thane': { id: 'thane', name: 'Thane', lat: 19.1872, lng: 72.9781, modes: ['local_train', 'metro', 'bus_terminal'] }
+};
+
+// Calculate distance between two coordinates (Haversine formula)
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+// Find nearest station to a location
+function findNearestStation(lat, lng, maxDistance = 2) {
+    let nearest = null;
+    let minDistance = maxDistance;
+
+    Object.values(STATIONS_DB).forEach(station => {
+        const distance = calculateDistance(lat, lng, station.lat, station.lng);
+        if (distance < minDistance) {
+            minDistance = distance;
+            nearest = { ...station, distance };
+        }
+    });
+
+    return nearest;
+}
+
 function JourneyPlanner({ socket }) {
     const [origin, setOrigin] = useState({ lat: '', lng: '', name: '' });
     const [destination, setDestination] = useState({ lat: '', lng: '', name: '' });
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationLoading, setLocationLoading] = useState(false);
+    const [locationError, setLocationError] = useState(null);
     const [preferences, setPreferences] = useState({
         departureTime: new Date().toISOString().slice(0, 16),
         preferFast: true,
@@ -32,6 +92,55 @@ function JourneyPlanner({ socket }) {
         { name: 'Thane', lat: 19.1872, lng: 72.9781 },
         { name: 'CSMT', lat: 18.9398, lng: 72.8355 }
     ];
+
+    // Get user's current location
+    const getUserLocation = () => {
+        setLocationLoading(true);
+        setLocationError(null);
+
+        if (!navigator.geolocation) {
+            setLocationError('Geolocation is not supported by your browser');
+            setLocationLoading(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const userLoc = { lat: latitude, lng: longitude };
+                setUserLocation(userLoc);
+
+                // Find nearest station
+                const nearestStation = findNearestStation(latitude, longitude);
+
+                if (nearestStation) {
+                    // Auto-populate origin with nearest station
+                    setOrigin({
+                        lat: nearestStation.lat,
+                        lng: nearestStation.lng,
+                        name: nearestStation.name,
+                        stationId: nearestStation.id
+                    });
+
+                    setError(null);
+                } else {
+                    setError('No nearby stations found. Please enter location manually.');
+                }
+
+                setLocationLoading(false);
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                setLocationError(`Unable to get location: ${error.message}`);
+                setLocationLoading(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    };
 
     const handlePlanJourney = async () => {
         if (!origin.lat || !origin.lng || !destination.lat || !destination.lng) {
@@ -97,10 +206,21 @@ function JourneyPlanner({ socket }) {
 
                         <div className="location-section">
                             <div className="input-group">
-                                <label className="input-label">
-                                    <User size={16} />
-                                    Origin
-                                </label>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                                    <label className="input-label" style={{ margin: 0 }}>
+                                        <User size={16} />
+                                        Origin
+                                    </label>
+                                    <button
+                                        className="location-btn"
+                                        onClick={getUserLocation}
+                                        disabled={locationLoading}
+                                        title="Get your current location"
+                                    >
+                                        <Locate size={16} />
+                                        {locationLoading ? 'Detecting...' : 'Detect'}
+                                    </button>
+                                </div>
                                 <input
                                     type="text"
                                     className="input"
@@ -126,6 +246,11 @@ function JourneyPlanner({ socket }) {
                                         onChange={(e) => setOrigin({ ...origin, lng: e.target.value })}
                                     />
                                 </div>
+                                {locationError && (
+                                    <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '0.5rem' }}>
+                                        {locationError}
+                                    </div>
+                                )}
                                 <div className="quick-locations">
                                     {popularLocations.slice(0, 3).map(loc => (
                                         <button
@@ -265,7 +390,19 @@ function JourneyPlanner({ socket }) {
 
                 <div className="planner-results">
                     <div className="map-pane card">
-                        <MapOverlay socket={socket} center={[19.0760, 72.8777]} zoom={12} />
+                        <MapOverlay
+                            socket={socket}
+                            center={[19.0760, 72.8777]}
+                            zoom={12}
+                            userLocation={userLocation}
+                            originStation={origin.lat ? STATIONS_DB[Object.keys(STATIONS_DB).find(key =>
+                                STATIONS_DB[key].lat === parseFloat(origin.lat) && STATIONS_DB[key].lng === parseFloat(origin.lng)
+                            )] : null}
+                            destinationStation={destination.lat ? STATIONS_DB[Object.keys(STATIONS_DB).find(key =>
+                                STATIONS_DB[key].lat === parseFloat(destination.lat) && STATIONS_DB[key].lng === parseFloat(destination.lng)
+                            )] : null}
+                            showTracks={true}
+                        />
                     </div>
 
                     {routes.length === 0 && !loading && (

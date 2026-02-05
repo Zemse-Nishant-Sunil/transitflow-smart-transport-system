@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './CrowdIndicator.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 

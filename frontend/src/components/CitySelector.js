@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './CitySelector.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 export default function CitySelector({ onSelect }) {
     const [cities, setCities] = useState([]);
-    const [detected, setDetected] = useState(null);
 
     useEffect(() => {
         // Query backend for known feeds
@@ -21,14 +21,16 @@ export default function CitySelector({ onSelect }) {
                 try {
                     const r = await axios.get(`https://geocode.xyz/${latitude},${longitude}?geoit=json`);
                     const country = (r.data && r.data.country) || null;
-                    setDetected(country);
                     // Ask backend to detect language/currency
                     // Backend API expects country code e.g., ?country=IN
                     // This is a best-effort auto-select - user can override
+                    if (country) {
+                        console.log('Detected country:', country);
+                    }
                 } catch (err) {
                     // ignore
                 }
-            }, () => {});
+            }, () => { });
         }
     }, []);
 
@@ -36,11 +38,11 @@ export default function CitySelector({ onSelect }) {
         <div className="city-selector">
             <h4>Select City</h4>
             <div className="city-list">
-                <button onClick={() => onSelect('auto')}>Auto-detect {detected ? `(${detected})` : ''}</button>
+                {/* <button onClick={() => onSelect('auto')}>Auto-detect {detected ? `(${detected})` : ''}</button> */}
                 {cities.map(c => (
                     <button key={c} onClick={() => onSelect(c)}>{c}</button>
                 ))}
-                {cities.length === 0 && <p>No city feeds registered yet.</p>}
+                {/* {cities.length === 0 && <p>No city feeds registered yet.</p>} */}
             </div>
         </div>
     );

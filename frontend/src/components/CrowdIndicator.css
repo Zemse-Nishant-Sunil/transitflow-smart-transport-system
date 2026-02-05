@@ -1,0 +1,64 @@
+.crowd-indicator {
+    padding: 0.875rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.crowd-indicator strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.crowd-indicator div {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.crowd-indicator.level-low {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10B981;
+}
+
+.crowd-indicator.level-low strong {
+    color: #10B981;
+}
+
+.crowd-indicator.level-medium {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #F59E0B;
+}
+
+.crowd-indicator.level-medium strong {
+    color: #F59E0B;
+}
+
+.crowd-indicator.level-high {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+}
+
+.crowd-indicator.level-high strong {
+    color: #EF4444;
+}
+
+.crowd-indicator.level-very_high {
+    background: linear-gradient(135deg, rgba(124, 45, 18, 0.3), rgba(124, 45, 18, 0.2));
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #DC2626;
+}
+
+.crowd-indicator.level-very_high strong {
+    color: #DC2626;
+}
